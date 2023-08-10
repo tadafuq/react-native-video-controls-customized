@@ -1,6 +1,6 @@
 {
-  "name": "react-native-video-controls",
-  "version": "2.8.1",
+  "name": "react-native-video-controls-customized",
+  "version": "2.8.3",
   "description": "A set of GUI controls for the react-native-video component",
   "license": "MIT",
   "main": "VideoPlayer.js",
@@ -18,7 +18,7 @@
   "author": "Nubix (https://github.com/itsnubix)",
   "repository": {
     "type": "git",
-    "url": "git@github.com:itsnubix/react-native-video-controls.git"
+    "url": "git@github.com:tadafuq/react-native-video-controls-customized.git"
   },
   "dependencies": {
     "lodash": "^4.16.4"

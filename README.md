@@ -1,3 +1,6 @@
+# This is a fork from (https://github.com/itsnubix) that adds a custom functionalities for tfarraj.tv
+
+
 # react-native-video-controls
 
 [![ci][1]][2]
