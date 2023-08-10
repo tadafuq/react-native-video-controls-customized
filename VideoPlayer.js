@@ -14,6 +14,7 @@ import {
   Text,
 } from 'react-native';
 import padStart from 'lodash/padStart';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default class VideoPlayer extends Component {
   static defaultProps = {
@@ -49,6 +50,9 @@ export default class VideoPlayer extends Component {
       muted: this.props.muted,
       volume: this.props.volume,
       rate: this.props.rate,
+      //thumbnail uri
+      thumbnailUri: this.props.thumbnailUri,
+
       // Controls
 
       isFullscreen:
@@ -70,6 +74,7 @@ export default class VideoPlayer extends Component {
       currentTime: 0,
       error: false,
       duration: 0,
+      shouldHideControls: this.props.shouldHideControls,
     };
 
     /**
@@ -100,6 +105,7 @@ export default class VideoPlayer extends Component {
       onLoad: this._onLoad.bind(this),
       onPause: this.props.onPause,
       onPlay: this.props.onPlay,
+      onVideoPress: this._onVideoPress.bind(this),
     };
 
     /**
@@ -110,6 +116,7 @@ export default class VideoPlayer extends Component {
       togglePlayPause: this._togglePlayPause.bind(this),
       toggleControls: this._toggleControls.bind(this),
       toggleTimer: this._toggleTimer.bind(this),
+      toggleMute: this._toggleMute.bind(this),
     };
 
     /**
@@ -158,6 +165,7 @@ export default class VideoPlayer extends Component {
     this.styles = {
       videoStyle: this.props.videoStyle || {},
       containerStyle: this.props.style || {},
+      thumbnailStyle: this.props.thumbnailStyle || {},
     };
   }
 
@@ -184,11 +192,15 @@ export default class VideoPlayer extends Component {
   /**
    * When load starts we display a loading icon
    * and show the controls.
+   * If the user wants to display a thumbnail instead, 
+   * the animation does not start.
    */
   _onLoadStart() {
     let state = this.state;
     state.loading = true;
-    this.loadAnimation();
+    if (!this.state.thumbnailUri){
+      this.loadAnimation();
+    }
     this.setState(state);
 
     if (typeof this.props.onLoadStart === 'function') {
@@ -317,6 +329,15 @@ export default class VideoPlayer extends Component {
   }
 
   /**
+   * This function triggers when the video is pressed
+   */
+  _onVideoPress() {
+    if (typeof this.props.onVideoPress === 'function') {
+      this.props.onVideoPress();
+    }
+  }
+
+  /**
     | -------------------------------------------------------
     | Methods
     | -------------------------------------------------------
@@ -331,12 +352,15 @@ export default class VideoPlayer extends Component {
   /**
    * Set a timeout when the controls are shown
    * that hides them after a length of time.
-   * Default is 15s
+   * Default is 15s 
+   * only in the case shouldHideControls is true
    */
   setControlTimeout() {
-    this.player.controlTimeout = setTimeout(() => {
-      this._hideControls();
-    }, this.player.controlTimeoutDelay);
+    if(this.state.shouldHideControls) {
+      this.player.controlTimeout = setTimeout(() => {
+        this._hideControls();
+      }, this.player.controlTimeoutDelay);
+    }
   }
 
   /**
@@ -523,6 +547,15 @@ export default class VideoPlayer extends Component {
   _toggleTimer() {
     let state = this.state;
     state.showTimeRemaining = !state.showTimeRemaining;
+    this.setState(state);
+  }
+
+  /**
+   * Toggle the video volume on and off
+   */
+  _toggleMute() {
+    let state = this.state;
+    state.muted = !state.muted;
     this.setState(state);
   }
 
@@ -753,6 +786,10 @@ export default class VideoPlayer extends Component {
     if (this.styles.containerStyle !== nextProps.style) {
       this.styles.containerStyle = nextProps.style;
     }
+
+    if (this.styles.thumbnailStyle !== nextProps.style) {
+      this.styles.thumbnailStyle = nextProps.style;
+    }
   }
 
   /**
@@ -949,15 +986,15 @@ export default class VideoPlayer extends Component {
    * view and spaces them out.
    */
   renderTopControls() {
-    const backControl = this.props.disableBack
-      ? this.renderNullControl()
-      : this.renderBack();
+    // const backControl = this.props.disableBack
+    // ? this.renderNullControl()
+    // : this.renderBack();
     const volumeControl = this.props.disableVolume
       ? this.renderNullControl()
       : this.renderVolume();
-    const fullscreenControl = this.props.disableFullscreen
-      ? this.renderNullControl()
-      : this.renderFullscreen();
+    // const fullscreenControl = this.props.disableFullscreen
+    //   ? this.renderNullControl()
+    //   : this.renderFullscreen();
 
     return (
       <Animated.View
@@ -970,14 +1007,9 @@ export default class VideoPlayer extends Component {
         ]}>
         <ImageBackground
           source={require('./assets/img/top-vignette.png')}
-          style={[styles.controls.column]}
           imageStyle={[styles.controls.vignette]}>
-          <SafeAreaView style={styles.controls.topControlGroup}>
-            {backControl}
-            <View style={styles.controls.pullRight}>
-              {volumeControl}
-              {fullscreenControl}
-            </View>
+          <SafeAreaView>
+            {volumeControl}
           </SafeAreaView>
         </ImageBackground>
       </Animated.View>
@@ -1002,23 +1034,15 @@ export default class VideoPlayer extends Component {
    * Render the volume slider and attach the pan handlers
    */
   renderVolume() {
-    return (
-      <View style={styles.volume.container}>
-        <View
-          style={[styles.volume.fill, {width: this.state.volumeFillWidth}]}
-        />
-        <View
-          style={[styles.volume.track, {width: this.state.volumeTrackWidth}]}
-        />
-        <View
-          style={[styles.volume.handle, {left: this.state.volumePosition}]}
-          {...this.player.volumePanResponder.panHandlers}>
-          <Image
-            style={styles.volume.icon}
-            source={require('./assets/img/volume.png')}
-          />
-        </View>
-      </View>
+    return this.renderControl(
+      <MaterialCommunityIcons
+      name={this.state.muted ? "volume-variant-off" : "volume-high"}
+      color={'#fff'}
+      size={20}
+      style={{ padding: 10 }}
+    />,
+      this.methods.toggleMute,
+      styles.controls.volume,
     );
   }
 
@@ -1041,20 +1065,20 @@ export default class VideoPlayer extends Component {
    * Render bottom control group and wrap it in a holder
    */
   renderBottomControls() {
-    const timerControl = this.props.disableTimer
-      ? this.renderNullControl()
-      : this.renderTimer();
+    // const timerControl = this.props.disableTimer
+    //   ? this.renderNullControl()
+    //   : this.renderTimer();
     const seekbarControl = this.props.disableSeekbar
       ? this.renderNullControl()
       : this.renderSeekbar();
-    const playPauseControl = this.props.disablePlayPause
-      ? this.renderNullControl()
-      : this.renderPlayPause();
+    // const playPauseControl = this.props.disablePlayPause
+    //   ? this.renderNullControl()
+    //   : this.renderPlayPause();
 
     return (
       <Animated.View
         style={[
-          styles.controls.bottom,
+          // styles.controls.bottom,
           {
             opacity: this.animations.bottomControl.opacity,
             marginBottom: this.animations.bottomControl.marginBottom,
@@ -1062,15 +1086,13 @@ export default class VideoPlayer extends Component {
         ]}>
         <ImageBackground
           source={require('./assets/img/bottom-vignette.png')}
-          style={[styles.controls.column]}
           imageStyle={[styles.controls.vignette]}>
           {seekbarControl}
-          <SafeAreaView
+          {/* <SafeAreaView
             style={[styles.controls.row, styles.controls.bottomControlGroup]}>
             {playPauseControl}
-            {this.renderTitle()}
             {timerControl}
-          </SafeAreaView>
+          </SafeAreaView> */}
         </ImageBackground>
       </Animated.View>
     );
@@ -1163,10 +1185,20 @@ export default class VideoPlayer extends Component {
   }
 
   /**
-   * Show loading icon
+   * Show loading icon or thumbnail
    */
   renderLoader() {
     if (this.state.loading) {
+      if (this.state.thumbnailUri) {
+        return (
+          <View style={styles.loader.container}>
+          <Image
+              source={{uri: this.state.thumbnailUri}}
+              style={[this.styles.thumbnailStyle]}
+          />
+          </View>
+        )
+      }
       return (
         <View style={styles.loader.container}>
           <Animated.Image
@@ -1215,23 +1247,28 @@ export default class VideoPlayer extends Component {
         onPress={this.events.onScreenTouch}
         style={[styles.player.container, this.styles.containerStyle]}>
         <View style={[styles.player.container, this.styles.containerStyle]}>
-          <Video
-            {...this.props}
-            ref={videoPlayer => (this.player.ref = videoPlayer)}
-            resizeMode={this.state.resizeMode}
-            volume={this.state.volume}
-            paused={this.state.paused}
-            muted={this.state.muted}
-            rate={this.state.rate}
-            onLoadStart={this.events.onLoadStart}
-            onProgress={this.events.onProgress}
-            onError={this.events.onError}
-            onLoad={this.events.onLoad}
-            onEnd={this.events.onEnd}
-            onSeek={this.events.onSeek}
-            style={[styles.player.video, this.styles.videoStyle]}
-            source={this.props.source}
-          />
+        <TouchableWithoutFeedback 
+          onPress={this.events.onVideoPress}
+          style={[styles.player.container, this.styles.containerStyle]}
+          >
+            <Video
+              {...this.props}
+              ref={videoPlayer => (this.player.ref = videoPlayer)}
+              resizeMode={this.state.resizeMode}
+              volume={this.state.volume}
+              paused={this.state.paused}
+              muted={this.state.muted}
+              rate={this.state.rate}
+              onLoadStart={this.events.onLoadStart}
+              onProgress={this.events.onProgress}
+              onError={this.events.onError}
+              onLoad={this.events.onLoad}
+              onEnd={this.events.onEnd}
+              onSeek={this.events.onSeek}
+              style={[styles.player.video, this.styles.videoStyle]}
+              source={this.props.source}
+            />
+          </TouchableWithoutFeedback>
           {this.renderError()}
           {this.renderLoader()}
           {this.renderTopControls()}
@@ -1327,15 +1364,11 @@ const styles = {
       alignItems: 'center',
       justifyContent: 'center',
     },
-    top: {
-      flex: 1,
-      alignItems: 'stretch',
-      justifyContent: 'flex-start',
-    },
-    bottom: {
-      alignItems: 'stretch',
-      flex: 2,
-      justifyContent: 'flex-end',
+    volume: {
+      alignSelf: 'flex-end',
+      marginTop: -5,
+      position: 'absolute',
+      padding: 0
     },
     topControlGroup: {
       alignSelf: 'stretch',
@@ -1353,9 +1386,6 @@ const styles = {
       marginLeft: 12,
       marginRight: 12,
       marginBottom: 0,
-    },
-    volume: {
-      flexDirection: 'row',
     },
     fullscreen: {
       flexDirection: 'row',
