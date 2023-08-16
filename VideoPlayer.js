@@ -1446,19 +1446,17 @@ const styles = {
   seekbar: StyleSheet.create({
     container: {
       alignSelf: 'stretch',
-      height: 28,
-      marginLeft: 20,
-      marginRight: 20,
+      height: 20,
     },
     track: {
-      backgroundColor: '#333',
+      backgroundColor: 'red',
       height: 1,
       position: 'relative',
       top: 14,
       width: '100%',
     },
     fill: {
-      backgroundColor: '#FFF',
+      backgroundColor: 'red',
       height: 1,
       width: '100%',
     },
