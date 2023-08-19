@@ -34,6 +34,7 @@ export default class VideoPlayer extends Component {
     rate: 1,
     showTimeRemaining: true,
     showHours: false,
+    seekbarStyle: StyleSheet.create({}),
   };
 
   constructor(props) {
@@ -192,7 +193,7 @@ export default class VideoPlayer extends Component {
   /**
    * When load starts we display a loading icon
    * and show the controls.
-   * If the user wants to display a thumbnail instead, 
+   * If the user wants to display a thumbnail instead,
    * the animation does not start.
    */
   _onLoadStart() {
@@ -352,7 +353,7 @@ export default class VideoPlayer extends Component {
   /**
    * Set a timeout when the controls are shown
    * that hides them after a length of time.
-   * Default is 15s 
+   * Default is 15s
    * only in the case shouldHideControls is true
    */
   setControlTimeout() {
@@ -1104,11 +1105,11 @@ export default class VideoPlayer extends Component {
   renderSeekbar() {
     return (
       <View
-        style={styles.seekbar.container}
+        style={[styles.seekbar.container, this.props.seekbarStyle?.container]}
         collapsable={false}
         {...this.player.seekPanResponder.panHandlers}>
         <View
-          style={styles.seekbar.track}
+          style={[styles.seekbar.track, this.props.seekbarStyle?.track]}
           onLayout={event =>
             (this.player.seekerWidth = event.nativeEvent.layout.width)
           }
@@ -1125,11 +1126,12 @@ export default class VideoPlayer extends Component {
           />
         </View>
         <View
-          style={[styles.seekbar.handle, {left: this.state.seekerPosition}]}
+          style={[styles.seekbar.handle, this.props.seekbarStyle?.handle, {left: this.state.seekerPosition}]}
           pointerEvents={'none'}>
           <View
             style={[
               styles.seekbar.circle,
+              this.props.seekbarStyle?.circle,
               {backgroundColor: this.props.seekColor || '#FFF'},
             ]}
             pointerEvents={'none'}
@@ -1247,7 +1249,7 @@ export default class VideoPlayer extends Component {
         onPress={this.events.onScreenTouch}
         style={[styles.player.container, this.styles.containerStyle]}>
         <View style={[styles.player.container, this.styles.containerStyle]}>
-        <TouchableWithoutFeedback 
+        <TouchableWithoutFeedback
           onPress={this.events.onVideoPress}
           style={[styles.player.container, this.styles.containerStyle]}
           >
@@ -1472,7 +1474,7 @@ const styles = {
       left: 7,
       height: 12,
       width: 12,
-      zIndex: 10, 
+      zIndex: 10,
       elevation: 10
     },
   }),
