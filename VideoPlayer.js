@@ -1287,7 +1287,6 @@ export default class VideoPlayer extends Component {
 const styles = {
   player: StyleSheet.create({
     container: {
-      overflow: 'hidden',
       backgroundColor: '#000',
       flex: 1,
       alignSelf: 'stretch',
@@ -1452,7 +1451,7 @@ const styles = {
       backgroundColor: 'white',
       height: 1,
       position: 'absolute',
-      top: 18,
+      top: 20,
       width: '100%',
     },
     fill: {
@@ -1468,10 +1467,13 @@ const styles = {
     },
     circle: {
       position: 'absolute',
-      top: 12,
+      borderRadius: 12,
+      top: 14,
       left: 7,
       height: 12,
       width: 12,
+      zIndex: 10, 
+      elevation: 10
     },
   }),
 };
