@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { I18nManager } from 'react-native';
 import Video from 'react-native-video';
 import {
   TouchableWithoutFeedback,
@@ -1335,7 +1336,7 @@ const styles = {
   }),
   controls: StyleSheet.create({
     row: {
-      flexDirection: 'row',
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       height: null,
@@ -1361,7 +1362,7 @@ const styles = {
       textAlign: 'center',
     },
     pullRight: {
-      flexDirection: 'row',
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -1375,7 +1376,7 @@ const styles = {
       alignSelf: 'stretch',
       alignItems: 'center',
       justifyContent: 'space-between',
-      flexDirection: 'row',
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
       width: null,
       margin: 12,
       marginBottom: 18,
@@ -1389,7 +1390,7 @@ const styles = {
       marginBottom: 0,
     },
     fullscreen: {
-      flexDirection: 'row',
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
     playPause: {
       position: 'relative',
@@ -1419,7 +1420,7 @@ const styles = {
     container: {
       alignItems: 'center',
       justifyContent: 'flex-start',
-      flexDirection: 'row',
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
       height: 1,
       marginLeft: 20,
       marginRight: 20,
@@ -1429,16 +1430,19 @@ const styles = {
       backgroundColor: '#333',
       height: 1,
       marginLeft: 7,
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
     fill: {
       backgroundColor: '#FFF',
       height: 1,
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
     handle: {
       position: 'absolute',
       marginTop: -24,
       marginLeft: -24,
       padding: 16,
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
     icon: {
       marginLeft: 7,
@@ -1448,6 +1452,7 @@ const styles = {
     container: {
       alignSelf: 'stretch',
       height: 20,
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
     track: {
       backgroundColor: 'white',
@@ -1455,17 +1460,20 @@ const styles = {
       position: 'absolute',
       top: 20,
       width: '100%',
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
     fill: {
       backgroundColor: 'white',
       height: 1,
       width: '100%',
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
     handle: {
       position: 'absolute',
       marginLeft: -7,
       height: 28,
       width: 28,
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
     circle: {
       position: 'absolute',
@@ -1474,8 +1482,9 @@ const styles = {
       left: 7,
       height: 12,
       width: 12,
-      zIndex: 10,
-      elevation: 10
+      zIndex: 10, 
+      elevation: 10,
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
   }),
 };
