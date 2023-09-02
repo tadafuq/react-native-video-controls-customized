@@ -159,6 +159,9 @@ export default class VideoPlayer extends Component {
         rotate: new Animated.Value(0),
         MAX_VALUE: 360,
       },
+      volume:{
+        opacity: new Animated.Value(0.8),
+      }
     };
 
     /**
@@ -223,6 +226,7 @@ export default class VideoPlayer extends Component {
     state.duration = data.duration;
     state.loading = false;
     this.setState(state);
+    this.volumeAnnimation();
 
     if (state.showControls) {
       this.setControlTimeout();
@@ -378,6 +382,21 @@ export default class VideoPlayer extends Component {
   resetControlTimeout() {
     this.clearControlTimeout();
     this.setControlTimeout();
+  }
+
+  /**
+   * Animation to hide the volume background
+   * after a time delay
+   */
+  volumeAnnimation() {
+    Animated.sequence([
+      Animated.delay(6000),
+      Animated.timing(this.animations.volume.opacity, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: false,
+      }),
+    ]).start();
   }
 
   /**
@@ -988,6 +1007,9 @@ export default class VideoPlayer extends Component {
    * view and spaces them out.
    */
   renderTopControls() {
+    if (this.state.error) {
+      return null;
+    }
     // const backControl = this.props.disableBack
     // ? this.renderNullControl()
     // : this.renderBack();
@@ -1037,12 +1059,20 @@ export default class VideoPlayer extends Component {
    */
   renderVolume() {
     return this.renderControl(
-      <MaterialCommunityIcons
-      name={this.state.muted ? "volume-variant-off" : "volume-high"}
-      color={'#fff'}
-      size={20}
-      style={{ padding: 10 }}
-    />,
+      <View>
+        <Animated.View
+          style={{
+            ...styles.volume.iconBackground,
+            opacity: this.animations.volume.opacity,
+          }}
+        />
+        <MaterialCommunityIcons
+          name={this.state.muted ? "volume-off" : "volume-high"}
+          color={'#fff'}
+          size={20}
+          style={styles.volume.icon}
+        />
+      </View>,
       this.methods.toggleMute,
       styles.controls.volume,
     );
@@ -1067,6 +1097,9 @@ export default class VideoPlayer extends Component {
    * Render bottom control group and wrap it in a holder
    */
   renderBottomControls() {
+    if (this.state.error) {
+      return null;
+    }
     // const timerControl = this.props.disableTimer
     //   ? this.renderNullControl()
     //   : this.renderTimer();
@@ -1445,7 +1478,16 @@ const styles = {
       flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },
     icon: {
-      marginLeft: 7,
+      padding: 10,
+      top: 5
+    },
+    iconBackground: {
+      width: 40,
+      height: 40,
+      position: 'absolute',
+      top:5,
+      backgroundColor: '#0c0c0c',
+      borderRadius: 20,
     },
   }),
   seekbar: StyleSheet.create({
