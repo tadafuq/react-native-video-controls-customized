@@ -77,6 +77,7 @@ export default class VideoPlayer extends Component {
       error: false,
       duration: 0,
       shouldHideControls: this.props.shouldHideControls,
+      showHandle: this.props.showHandle,
     };
 
     /**
@@ -1157,22 +1158,26 @@ export default class VideoPlayer extends Component {
                 width: this.state.seekerFillWidth,
                 backgroundColor: this.props.seekColor || '#FFF',
               },
+              this.props.seekbarStyle?.fill
             ]}
             pointerEvents={'none'}
           />
         </View>
-        <View
-          style={[styles.seekbar.handle, this.props.seekbarStyle?.handle, {left: this.state.seekerPosition}]}
-          pointerEvents={'none'}>
+        {this.state.showHandle &&  
           <View
-            style={[
-              styles.seekbar.circle,
-              this.props.seekbarStyle?.circle,
-              {backgroundColor: this.props.seekColor || '#FFF'},
-            ]}
-            pointerEvents={'none'}
-          />
-        </View>
+            style={[styles.seekbar.handle, this.props.seekbarStyle?.handle, {left: this.state.seekerPosition}]}
+            pointerEvents={'none'}>
+            <View
+              style={[
+                styles.seekbar.circle,
+                this.props.seekbarStyle?.circle,
+                {backgroundColor: this.props.seekColor || '#FFF'},
+              ]}
+              pointerEvents={'none'}
+            />
+          </View>
+        }
+
       </View>
     );
   }
