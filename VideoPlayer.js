@@ -340,6 +340,8 @@ export default class VideoPlayer extends Component {
   _onVideoPress() {
     if (typeof this.props.onVideoPress === 'function') {
       this.props.onVideoPress();
+    } else {
+      this.events.onScreenTouch();
     }
   }
 
