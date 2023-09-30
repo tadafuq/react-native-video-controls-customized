@@ -1046,11 +1046,11 @@ export default class VideoPlayer extends Component {
             marginTop: this.animations.topControl.marginTop,
           },
         ]}>
-        <ImageBackground
+        <SafeAreaView>{volumeControl}</SafeAreaView>
+        {/* <ImageBackground
           source={require('./assets/img/top-vignette.png')}
           imageStyle={[styles.controls.vignette]}>
-          <SafeAreaView>{volumeControl}</SafeAreaView>
-        </ImageBackground>
+        </ImageBackground> */}
       </Animated.View>
     );
   }
@@ -1134,16 +1134,16 @@ export default class VideoPlayer extends Component {
             marginBottom: this.animations.bottomControl.marginBottom,
           },
         ]}>
-        <ImageBackground
+        {seekbarControl}
+        {/*<ImageBackground
           source={require('./assets/img/bottom-vignette.png')}
           imageStyle={[styles.controls.vignette]}>
-          {seekbarControl}
-          {/* <SafeAreaView
+           <SafeAreaView
             style={[styles.controls.row, styles.controls.bottomControlGroup]}>
             {playPauseControl}
             {timerControl}
-          </SafeAreaView> */}
-        </ImageBackground>
+          </SafeAreaView> 
+        </ImageBackground>*/}
       </Animated.View>
     );
   }
@@ -1246,7 +1246,7 @@ export default class VideoPlayer extends Component {
    * Show loading icon or thumbnail
    */
   renderLoader() {
-    if (this.state.loading) {
+    if (this.state.loading || !this.props.shouldPlay) {
       if (this.props.thumbnailUri) {
         return (
           <View style={styles.loader.container}>
