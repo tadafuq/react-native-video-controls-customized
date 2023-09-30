@@ -71,7 +71,7 @@ interface VideoPlayerProperties extends VideoProperties {
   /** Thumbnail URL to show instead of a loader */
   thumbnailUri?: string;
   /** React Native StyleSheet object that is applied to the thumbnail */
-  thumbnailStyle?: ViewStyle;
+  thumbnailStyle?: StyleProp<ViewStyle>;
   /** Fired when the user presses on the video */
   onVideoPress?: () => void;
   /** If false, the handle of the seekbar will be hidden */
@@ -80,6 +80,10 @@ interface VideoPlayerProperties extends VideoProperties {
   seekbarStyle?: seekbarStyleProps;
   /** Fired when the video is ready to start playing */
   onReadyForDisplay?: () => void;
+  /** Duration string to display on top of video before the video is loaded */
+  durationText?: string | null;
+  /** Should this video play */
+  shouldPlay?: boolean;
 }
 
 export default class VideoPlayer extends Component<VideoPlayerProperties> {

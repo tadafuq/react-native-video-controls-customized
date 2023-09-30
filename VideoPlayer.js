@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import { I18nManager } from 'react-native';
+import I18nManager from 'react-native';
+import FastImage from 'react-native-fast-image';
 import Video from 'react-native-video';
 import {
   TouchableWithoutFeedback,
@@ -36,6 +37,8 @@ export default class VideoPlayer extends Component {
     showTimeRemaining: true,
     showHours: false,
     seekbarStyle: StyleSheet.create({}),
+    durationText: '',
+    shouldPlay: true,
   };
 
   constructor(props) {
@@ -52,9 +55,6 @@ export default class VideoPlayer extends Component {
       muted: this.props.muted,
       volume: this.props.volume,
       rate: this.props.rate,
-      //thumbnail uri
-      thumbnailUri: this.props.thumbnailUri,
-
       // Controls
 
       isFullscreen:
@@ -78,6 +78,7 @@ export default class VideoPlayer extends Component {
       duration: 0,
       shouldHideControls: this.props.shouldHideControls,
       showHandle: this.props.showHandle,
+      durationText: this.props.durationText,
     };
 
     /**
@@ -161,9 +162,9 @@ export default class VideoPlayer extends Component {
         rotate: new Animated.Value(0),
         MAX_VALUE: 360,
       },
-      volume:{
+      volume: {
         opacity: new Animated.Value(0.8),
-      }
+      },
     };
 
     /**
@@ -205,7 +206,7 @@ export default class VideoPlayer extends Component {
   _onLoadStart() {
     let state = this.state;
     state.loading = true;
-    if (!this.state.thumbnailUri){
+    if (!this.props.thumbnailUri) {
       this.loadAnimation();
     }
     this.setState(state);
@@ -236,20 +237,20 @@ export default class VideoPlayer extends Component {
    * and hide the controls. We also set the
    * video duration.
    */
-    _onReadyForDisplay() {
-      let state = this.state;
-      state.loading = false;
-      this.setState(state);
-      this.volumeAnnimation();
-  
-      if (state.showControls) {
-        this.setControlTimeout();
-      }
-  
-      if (typeof this.props.onReadyForDisplay === 'function') {
-        this.props.onReadyForDisplay(...arguments);
-      }
+  _onReadyForDisplay() {
+    let state = this.state;
+    state.loading = false;
+    this.setState(state);
+    this.volumeAnnimation();
+
+    if (state.showControls) {
+      this.setControlTimeout();
     }
+
+    if (typeof this.props.onReadyForDisplay === 'function') {
+      this.props.onReadyForDisplay(...arguments);
+    }
+  }
 
   /**
    * For onprogress we fire listeners that
@@ -378,7 +379,7 @@ export default class VideoPlayer extends Component {
    * only in the case shouldHideControls is true
    */
   setControlTimeout() {
-    if(this.state.shouldHideControls) {
+    if (this.state.shouldHideControls) {
       this.player.controlTimeout = setTimeout(() => {
         this._hideControls();
       }, this.player.controlTimeoutDelay);
@@ -1048,9 +1049,7 @@ export default class VideoPlayer extends Component {
         <ImageBackground
           source={require('./assets/img/top-vignette.png')}
           imageStyle={[styles.controls.vignette]}>
-          <SafeAreaView>
-            {volumeControl}
-          </SafeAreaView>
+          <SafeAreaView>{volumeControl}</SafeAreaView>
         </ImageBackground>
       </Animated.View>
     );
@@ -1083,7 +1082,7 @@ export default class VideoPlayer extends Component {
           }}
         />
         <MaterialCommunityIcons
-          name={this.state.muted ? "volume-off" : "volume-high"}
+          name={this.state.muted ? 'volume-off' : 'volume-high'}
           color={'#fff'}
           size={20}
           style={styles.volume.icon}
@@ -1171,14 +1170,18 @@ export default class VideoPlayer extends Component {
                 width: this.state.seekerFillWidth,
                 backgroundColor: this.props.seekColor || '#FFF',
               },
-              this.props.seekbarStyle?.fill
+              this.props.seekbarStyle?.fill,
             ]}
             pointerEvents={'none'}
           />
         </View>
-        {this.state.showHandle &&  
+        {this.state.showHandle && (
           <View
-            style={[styles.seekbar.handle, this.props.seekbarStyle?.handle, {left: this.state.seekerPosition}]}
+            style={[
+              styles.seekbar.handle,
+              this.props.seekbarStyle?.handle,
+              {left: this.state.seekerPosition},
+            ]}
             pointerEvents={'none'}>
             <View
               style={[
@@ -1189,8 +1192,7 @@ export default class VideoPlayer extends Component {
               pointerEvents={'none'}
             />
           </View>
-        }
-
+        )}
       </View>
     );
   }
@@ -1245,15 +1247,23 @@ export default class VideoPlayer extends Component {
    */
   renderLoader() {
     if (this.state.loading) {
-      if (this.state.thumbnailUri) {
+      if (this.props.thumbnailUri) {
         return (
           <View style={styles.loader.container}>
-          <Image
-              source={{uri: this.state.thumbnailUri}}
+            <FastImage
+              source={{
+                uri: this.props.thumbnailUri,
+                priority: FastImage.priority.normal,
+              }}
               style={[this.styles.thumbnailStyle]}
-          />
+            />
+            {this.state.durationText && (
+              <Text style={styles.loader.duration}>
+                {this.state.durationText}
+              </Text>
+            )}
           </View>
-        )
+        );
       }
       return (
         <View style={styles.loader.container}>
@@ -1303,28 +1313,30 @@ export default class VideoPlayer extends Component {
         onPress={this.events.onScreenTouch}
         style={[styles.player.container, this.styles.containerStyle]}>
         <View style={[styles.player.container, this.styles.containerStyle]}>
-          <TouchableWithoutFeedback
-            onPress={this.events.onVideoPress}
-            style={[styles.player.container, this.styles.containerStyle]}>
-            <Video
-              {...this.props}
-              ref={videoPlayer => (this.player.ref = videoPlayer)}
-              resizeMode={this.state.resizeMode}
-              volume={this.state.volume}
-              paused={this.state.paused}
-              muted={this.state.muted}
-              rate={this.state.rate}
-              onLoadStart={this.events.onLoadStart}
-              onReadyForDisplay={this.events.onReadyForDisplay}
-              onProgress={this.events.onProgress}
-              onError={this.events.onError}
-              onLoad={this.events.onLoad}
-              onEnd={this.events.onEnd}
-              onSeek={this.events.onSeek}
-              style={[styles.player.video, this.styles.videoStyle]}
-              source={this.props.source}
-            />
-          </TouchableWithoutFeedback>
+          {this.props.shouldPlay && (
+            <TouchableWithoutFeedback
+              onPress={this.events.onVideoPress}
+              style={[styles.player.container, this.styles.containerStyle]}>
+              <Video
+                {...this.props}
+                ref={videoPlayer => (this.player.ref = videoPlayer)}
+                resizeMode={this.state.resizeMode}
+                volume={this.state.volume}
+                paused={this.state.paused}
+                muted={this.state.muted}
+                rate={this.state.rate}
+                onLoadStart={this.events.onLoadStart}
+                onReadyForDisplay={this.events.onReadyForDisplay}
+                onProgress={this.events.onProgress}
+                onError={this.events.onError}
+                onLoad={this.events.onLoad}
+                onEnd={this.events.onEnd}
+                onSeek={this.events.onSeek}
+                style={[styles.player.video, this.styles.videoStyle]}
+                source={this.props.source}
+              />
+            </TouchableWithoutFeedback>
+          )}
           {this.renderError()}
           {this.renderLoader()}
           {this.renderTopControls()}
@@ -1385,6 +1397,18 @@ const styles = {
       left: 0,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    duration: {
+      color: 'white',
+      backgroundColor: 'black',
+      opacity: 0.8,
+      position: 'absolute',
+      bottom: 10,
+      right: 10,
+      borderRadius: 5,
+      paddingRight: 5,
+      paddingLeft: 5,
+      overflow: 'hidden',
     },
   }),
   controls: StyleSheet.create({
@@ -1505,7 +1529,7 @@ const styles = {
       width: 40,
       height: 40,
       position: 'absolute',
-      top:5,
+      top: 5,
       backgroundColor: '#0c0c0c',
       borderRadius: 20,
     },
@@ -1544,7 +1568,7 @@ const styles = {
       left: 7,
       height: 12,
       width: 12,
-      zIndex: 10, 
+      zIndex: 10,
       elevation: 10,
       flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },

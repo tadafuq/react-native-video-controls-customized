@@ -21,7 +21,8 @@
     "url": "git+ssh://git@github.com/tadafuq/react-native-video-controls-customized.git"
   },
   "dependencies": {
-    "lodash": "^4.16.4"
+    "lodash": "^4.16.4",
+    "react-native-fast-image": "^8.6.3"
   },
   "peerDependencies": {
     "react-native": ">=0.46.0",
