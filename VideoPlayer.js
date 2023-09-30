@@ -72,7 +72,7 @@ export default class VideoPlayer extends Component {
       seeking: false,
       originallyPaused: false,
       scrubbing: false,
-      loading: false,
+      loading: true,
       currentTime: 0,
       error: false,
       duration: 0,
@@ -106,6 +106,7 @@ export default class VideoPlayer extends Component {
       onProgress: this._onProgress.bind(this),
       onSeek: this._onSeek.bind(this),
       onLoad: this._onLoad.bind(this),
+      onReadyForDisplay: this._onReadyForDisplay.bind(this),
       onPause: this.props.onPause,
       onPlay: this.props.onPlay,
       onVideoPress: this._onVideoPress.bind(this),
@@ -215,28 +216,40 @@ export default class VideoPlayer extends Component {
   }
 
   /**
-   * When load is finished we hide the load icon
-   * and hide the controls. We also set the
+   * When load is finished we set the
    * video duration.
    *
    * @param {object} data The video meta data
    */
   _onLoad(data = {}) {
     let state = this.state;
-
     state.duration = data.duration;
-    state.loading = false;
     this.setState(state);
-    this.volumeAnnimation();
-
-    if (state.showControls) {
-      this.setControlTimeout();
-    }
 
     if (typeof this.props.onLoad === 'function') {
       this.props.onLoad(...arguments);
     }
   }
+
+  /**
+   * When the video is ready to be displayed we hide the load icon/thumbnail
+   * and hide the controls. We also set the
+   * video duration.
+   */
+    _onReadyForDisplay() {
+      let state = this.state;
+      state.loading = false;
+      this.setState(state);
+      this.volumeAnnimation();
+  
+      if (state.showControls) {
+        this.setControlTimeout();
+      }
+  
+      if (typeof this.props.onReadyForDisplay === 'function') {
+        this.props.onReadyForDisplay(...arguments);
+      }
+    }
 
   /**
    * For onprogress we fire listeners that
@@ -1290,10 +1303,9 @@ export default class VideoPlayer extends Component {
         onPress={this.events.onScreenTouch}
         style={[styles.player.container, this.styles.containerStyle]}>
         <View style={[styles.player.container, this.styles.containerStyle]}>
-        <TouchableWithoutFeedback
-          onPress={this.events.onVideoPress}
-          style={[styles.player.container, this.styles.containerStyle]}
-          >
+          <TouchableWithoutFeedback
+            onPress={this.events.onVideoPress}
+            style={[styles.player.container, this.styles.containerStyle]}>
             <Video
               {...this.props}
               ref={videoPlayer => (this.player.ref = videoPlayer)}
@@ -1303,6 +1315,7 @@ export default class VideoPlayer extends Component {
               muted={this.state.muted}
               rate={this.state.rate}
               onLoadStart={this.events.onLoadStart}
+              onReadyForDisplay={this.events.onReadyForDisplay}
               onProgress={this.events.onProgress}
               onError={this.events.onError}
               onLoad={this.events.onLoad}
@@ -1410,7 +1423,7 @@ const styles = {
       alignSelf: 'flex-end',
       marginTop: -5,
       position: 'absolute',
-      padding: 0
+      padding: 0,
     },
     topControlGroup: {
       alignSelf: 'stretch',
@@ -1486,7 +1499,7 @@ const styles = {
     },
     icon: {
       padding: 10,
-      top: 5
+      top: 5,
     },
     iconBackground: {
       width: 40,

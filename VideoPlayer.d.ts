@@ -6,6 +6,15 @@ interface DuckNavigator {
   pop: () => void;
 }
 
+interface seekbarStyleProps {
+  /** React Native StyleSheet object that is applied to the seekbar's track */
+  track?: ViewStyle;
+  /** React Native StyleSheet object that is applied to the seekbar's fill */
+  fill?: ViewStyle;
+  /** React Native StyleSheet object that is applied to the seekbar's container */
+  container?: ViewStyle;
+}
+
 interface VideoPlayerProperties extends VideoProperties {
   /** If true, clicking the fullscreen button will toggle the <Video /> component between cover/contain, set to false if you want to customize fullscreen behaviour */
   toggleResizeModeOnFullscreen?: boolean;
@@ -59,6 +68,18 @@ interface VideoPlayerProperties extends VideoProperties {
   disableTimer?: boolean;
   /** Hide the back button */
   disableBack?: boolean;
+  /** Thumbnail URL to show instead of a loader */
+  thumbnailUri?: string;
+  /** React Native StyleSheet object that is applied to the thumbnail */
+  thumbnailStyle?: ViewStyle;
+  /** Fired when the user presses on the video */
+  onVideoPress?: () => void;
+  /** If false, the handle of the seekbar will be hidden */
+  showHandle?: boolean;
+  /** React Native StyleSheet objects that are applied to the seekbar */
+  seekbarStyle?: seekbarStyleProps;
+  /** Fired when the video is ready to start playing */
+  onReadyForDisplay?: () => void;
 }
 
 export default class VideoPlayer extends Component<VideoPlayerProperties> {
