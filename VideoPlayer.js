@@ -1250,18 +1250,20 @@ export default class VideoPlayer extends Component {
         return (
           <View style={styles.loader.container}>
             <TouchableWithoutFeedback onPress={this.events.onVideoPress}>
-              <FastImage
-                source={{
-                  uri: this.props.thumbnailUri,
-                  priority: FastImage.priority.normal,
-                }}
-                style={[this.styles.thumbnailStyle]}
-              />
-              {this.state.durationText && (
-                <Text style={styles.loader.duration}>
-                  {this.state.durationText}
-                </Text>
-              )}
+              <View>
+                <FastImage
+                  source={{
+                    uri: this.props.thumbnailUri,
+                    priority: FastImage.priority.normal,
+                  }}
+                  style={[this.styles.thumbnailStyle]}
+                />
+                {this.state.durationText && (
+                  <Text style={styles.loader.duration}>
+                    {this.state.durationText}
+                  </Text>
+                )}
+              </View>
             </TouchableWithoutFeedback>
           </View>
         );
