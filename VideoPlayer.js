@@ -5,7 +5,6 @@ import Video from 'react-native-video';
 import {
   TouchableWithoutFeedback,
   TouchableHighlight,
-  ImageBackground,
   PanResponder,
   StyleSheet,
   Animated,
@@ -1250,18 +1249,20 @@ export default class VideoPlayer extends Component {
       if (this.props.thumbnailUri) {
         return (
           <View style={styles.loader.container}>
-            <FastImage
-              source={{
-                uri: this.props.thumbnailUri,
-                priority: FastImage.priority.normal,
-              }}
-              style={[this.styles.thumbnailStyle]}
-            />
-            {this.state.durationText && (
-              <Text style={styles.loader.duration}>
-                {this.state.durationText}
-              </Text>
-            )}
+            <TouchableWithoutFeedback onPress={this.events.onVideoPress}>
+              <FastImage
+                source={{
+                  uri: this.props.thumbnailUri,
+                  priority: FastImage.priority.normal,
+                }}
+                style={[this.styles.thumbnailStyle]}
+              />
+              {this.state.durationText && (
+                <Text style={styles.loader.duration}>
+                  {this.state.durationText}
+                </Text>
+              )}
+            </TouchableWithoutFeedback>
           </View>
         );
       }
