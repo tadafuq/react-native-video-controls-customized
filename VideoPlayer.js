@@ -273,6 +273,9 @@ export default class VideoPlayer extends Component {
 
       this.setState(state);
     }
+    if (this.state.error) {
+      this.state.error = false;
+    }
   }
 
   /**
@@ -312,10 +315,10 @@ export default class VideoPlayer extends Component {
    * @param {object} err  Err obj returned from <Video> component
    */
   _onError(err) {
+    console.error('Error detected from video component: ', err);
     let state = this.state;
     state.error = true;
     state.loading = false;
-
     this.setState(state);
   }
 
