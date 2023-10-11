@@ -271,10 +271,11 @@ export default class VideoPlayer extends Component {
         this.props.onProgress(...arguments);
       }
 
+      if (state.error) {
+        state.error = false;
+      }
+
       this.setState(state);
-    }
-    if (this.state.error) {
-      this.state.error = false;
     }
   }
 
