@@ -24,7 +24,7 @@ export default class VideoPlayer extends Component {
     doubleTapTime: 130,
     playInBackground: false,
     playWhenInactive: false,
-    resizeMode: 'contain',
+    resizeMode: 'contain',https://github.com/tadafuq/react-native-video-controls-customized.git
     isFullscreen: false,
     showOnStart: true,
     paused: false,
@@ -1345,7 +1345,7 @@ export default class VideoPlayer extends Component {
             </TouchableWithoutFeedback>
           )}
           {this.renderError()}
-          {this.renderLoader()}
+          {/* {this.renderLoader()} */}
           {this.renderTopControls()}
           {this.renderBottomControls()}
         </View>
