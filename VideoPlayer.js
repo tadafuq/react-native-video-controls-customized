@@ -24,7 +24,7 @@ export default class VideoPlayer extends Component {
     doubleTapTime: 130,
     playInBackground: false,
     playWhenInactive: false,
-    resizeMode: 'contain',https://github.com/tadafuq/react-native-video-controls-customized.git
+    resizeMode: 'contain',
     isFullscreen: false,
     showOnStart: true,
     paused: false,
