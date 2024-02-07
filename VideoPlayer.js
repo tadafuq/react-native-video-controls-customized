@@ -1273,7 +1273,7 @@ export default class VideoPlayer extends Component {
           </View>
         );
       }
-      if(this.props.playLoaderAnimation) {
+      if (this.props.playLoaderAnimation) {
         return (
           <View style={styles.loader.container}>
             <Animated.Image

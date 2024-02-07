@@ -84,6 +84,8 @@ interface VideoPlayerProperties extends VideoProperties {
   durationText?: string | null;
   /** Should this video play */
   shouldPlay?: boolean;
+  /** Should the loader animation play */
+  playLoaderAnimation?: boolean;
 }
 
 export default class VideoPlayer extends Component<VideoPlayerProperties> {
