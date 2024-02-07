@@ -38,6 +38,7 @@ export default class VideoPlayer extends Component {
     seekbarStyle: StyleSheet.create({}),
     durationText: '',
     shouldPlay: true,
+    playLoaderAnimation: true,
   };
 
   constructor(props) {
@@ -205,7 +206,7 @@ export default class VideoPlayer extends Component {
   _onLoadStart() {
     let state = this.state;
     state.loading = true;
-    if (!this.props.thumbnailUri) {
+    if (this.props.playLoaderAnimation && !this.props.thumbnailUri) {
       this.loadAnimation();
     }
     this.setState(state);
@@ -1272,26 +1273,28 @@ export default class VideoPlayer extends Component {
           </View>
         );
       }
-      return (
-        <View style={styles.loader.container}>
-          <Animated.Image
-            source={require('./assets/img/loader-icon.png')}
-            style={[
-              styles.loader.icon,
-              {
-                transform: [
-                  {
-                    rotate: this.animations.loader.rotate.interpolate({
-                      inputRange: [0, 360],
-                      outputRange: ['0deg', '360deg'],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          />
-        </View>
-      );
+      if(this.props.playLoaderAnimation) {
+        return (
+          <View style={styles.loader.container}>
+            <Animated.Image
+              source={require('./assets/img/loader-icon.png')}
+              style={[
+                styles.loader.icon,
+                {
+                  transform: [
+                    {
+                      rotate: this.animations.loader.rotate.interpolate({
+                        inputRange: [0, 360],
+                        outputRange: ['0deg', '360deg'],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
+          </View>
+        );
+      }
     }
     return null;
   }
