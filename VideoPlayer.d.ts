@@ -104,6 +104,8 @@ interface VideoPlayerProperties extends VideoProperties {
   autoplayEnabled?: boolean;
   /** Is the layout of the controls right to left */
   isRTL?: boolean;
+  /** Function to set the watch percentage of the video */
+  setWatchTime?: (time: number) => void;
 }
 
 export default class VideoPlayer extends Component<VideoPlayerProperties> {

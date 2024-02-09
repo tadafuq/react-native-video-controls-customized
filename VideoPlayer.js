@@ -278,7 +278,9 @@ export default class VideoPlayer extends Component {
     let state = this.state;
     if (!state.scrubbing) {
       state.currentTime = data.currentTime;
-
+      if(typeof this.props.setWatchTime === 'function') {
+        this.props.setWatchTime(state.currentTime);
+      }
       if (!state.seeking) {
         const position = this.calculateSeekerPosition();
         this.setSeekerPosition(position);
@@ -325,9 +327,14 @@ export default class VideoPlayer extends Component {
    * new page.
    */
   _onEnd() {
+    let state = this.state;
+    state.paused = true;
+
     if (typeof this.props.onEnd === 'function') {
       this.props.onEnd(this.props.autoplayEnabled);
     }
+
+    this.setState(state);
   }
 
   /**
@@ -685,7 +692,10 @@ export default class VideoPlayer extends Component {
    * Restart the video from the beginning.
    */
   _restartVideo() {
+    let state = this.state;
     this.seekTo(0);
+    state.paused = false;
+    this.setState(state);
   }
 
   /**
