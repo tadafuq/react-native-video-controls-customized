@@ -39,6 +39,10 @@ export default class VideoPlayer extends Component {
     durationText: '',
     shouldPlay: true,
     playLoaderAnimation: true,
+    disableTimer: true,
+    disableFullscreen: true,
+    disablePlayPause: true,
+    disableVideoScreenControls: true,
   };
 
   constructor(props) {
@@ -97,7 +101,7 @@ export default class VideoPlayer extends Component {
     this.events = {
       onError: this.props.onError || this._onError.bind(this),
       onBack: this.props.onBack || this._onBack.bind(this),
-      onEnd: this.props.onEnd || this._onEnd.bind(this),
+      onEnd: this._onEnd.bind(this),
       onScreenTouch: this._onScreenTouch.bind(this),
       onEnterFullscreen: this.props.onEnterFullscreen,
       onExitFullscreen: this.props.onExitFullscreen,
@@ -122,6 +126,10 @@ export default class VideoPlayer extends Component {
       toggleControls: this._toggleControls.bind(this),
       toggleTimer: this._toggleTimer.bind(this),
       toggleMute: this._toggleMute.bind(this),
+      fastForward: this._fastForward.bind(this),
+      fastBackward: this._fastBackward.bind(this),
+      restartVideo: this._restartVideo.bind(this),
+      goToEnd: this._goToEnd.bind(this),
     };
 
     /**
@@ -164,6 +172,10 @@ export default class VideoPlayer extends Component {
       },
       volume: {
         opacity: new Animated.Value(0.8),
+      },
+      videoScreenControlsContainer: {
+        marginBottom: new Animated.Value(0),
+        opacity: new Animated.Value(initialValue),
       },
     };
 
@@ -241,10 +253,14 @@ export default class VideoPlayer extends Component {
     let state = this.state;
     state.loading = false;
     this.setState(state);
-    this.volumeAnnimation();
+    this.volumeAnimation();
 
     if (state.showControls) {
       this.setControlTimeout();
+    }
+
+    if (this.props.seekToSecond) {
+      this.seekTo(parseFloat(this.props.seekToSecond));
     }
 
     if (typeof this.props.onReadyForDisplay === 'function') {
@@ -262,7 +278,9 @@ export default class VideoPlayer extends Component {
     let state = this.state;
     if (!state.scrubbing) {
       state.currentTime = data.currentTime;
-
+      if(typeof this.props.setWatchTime === 'function') {
+        this.props.setWatchTime(state.currentTime);
+      }
       if (!state.seeking) {
         const position = this.calculateSeekerPosition();
         this.setSeekerPosition(position);
@@ -308,7 +326,16 @@ export default class VideoPlayer extends Component {
    * Either close the video or go to a
    * new page.
    */
-  _onEnd() {}
+  _onEnd() {
+    let state = this.state;
+    state.paused = true;
+
+    if (typeof this.props.onEnd === 'function') {
+      this.props.onEnd(this.props.autoplayEnabled);
+    }
+
+    this.setState(state);
+  }
 
   /**
    * Set the error state to true which then
@@ -409,7 +436,7 @@ export default class VideoPlayer extends Component {
    * Animation to hide the volume background
    * after a time delay
    */
-  volumeAnnimation() {
+  volumeAnimation() {
     Animated.sequence([
       Animated.delay(6000),
       Animated.timing(this.animations.volume.opacity, {
@@ -447,6 +474,19 @@ export default class VideoPlayer extends Component {
         duration: this.props.controlAnimationTiming,
         useNativeDriver: false,
       }),
+      Animated.timing(this.animations.videoScreenControlsContainer.opacity, {
+        toValue: 0,
+        duration: this.props.controlAnimationTiming,
+        useNativeDriver: false,
+      }),
+      Animated.timing(
+        this.animations.videoScreenControlsContainer.marginBottom,
+        {
+          toValue: -100,
+          duration: this.props.controlAnimationTiming,
+          useNativeDriver: false,
+        },
+      ),
     ]).start();
   }
 
@@ -477,6 +517,19 @@ export default class VideoPlayer extends Component {
         useNativeDriver: false,
         duration: this.props.controlAnimationTiming,
       }),
+      Animated.timing(this.animations.videoScreenControlsContainer.opacity, {
+        toValue: 1,
+        useNativeDriver: false,
+        duration: this.props.controlAnimationTiming,
+      }),
+      Animated.timing(
+        this.animations.videoScreenControlsContainer.marginBottom,
+        {
+          toValue: 0,
+          useNativeDriver: false,
+          duration: this.props.controlAnimationTiming,
+        },
+      ),
     ]).start();
   }
 
@@ -513,7 +566,6 @@ export default class VideoPlayer extends Component {
       this.hideControlAnimation();
       typeof this.events.onHideControls === 'function' &&
         this.events.onHideControls();
-
       this.setState(state);
     }
   }
@@ -553,6 +605,10 @@ export default class VideoPlayer extends Component {
 
     if (this.props.toggleResizeModeOnFullscreen) {
       state.resizeMode = state.isFullscreen === true ? 'cover' : 'contain';
+    }
+
+    if (typeof this.props.toggleFullScreen === 'function') {
+      this.props.toggleFullScreen();
     }
 
     if (state.isFullscreen) {
@@ -614,6 +670,40 @@ export default class VideoPlayer extends Component {
         'Warning: _onBack requires navigator property to function. Either modify the onBack prop or pass a navigator prop',
       );
     }
+  }
+
+  /**
+   * Fast forward 10 seconds in time.
+   */
+  _fastForward() {
+    let state = this.state;
+    this.seekTo(state.currentTime + 15);
+  }
+
+  /**
+   * Fast backwards 10 seconds in time.
+   */
+  _fastBackward() {
+    let state = this.state;
+    this.seekTo(state.currentTime - 15);
+  }
+
+  /**
+   * Restart the video from the beginning.
+   */
+  _restartVideo() {
+    let state = this.state;
+    this.seekTo(0);
+    state.paused = false;
+    this.setState(state);
+  }
+
+  /**
+   * Seek to the end of the video.
+   */
+  _goToEnd() {
+    let state = this.state;
+    this.seekTo(state.duration);
   }
 
   /**
@@ -1146,7 +1236,7 @@ export default class VideoPlayer extends Component {
             style={[styles.controls.row, styles.controls.bottomControlGroup]}>
             {playPauseControl}
             {timerControl}
-          </SafeAreaView> 
+          </SafeAreaView>
         </ImageBackground>*/}
       </Animated.View>
     );
@@ -1314,6 +1404,104 @@ export default class VideoPlayer extends Component {
     return null;
   }
 
+  renderVideoScreenControls() {
+    if (!this.props.disableVideoScreenControls) {
+      return (
+        <Animated.View
+          style={[
+            styles.controls.videoScreenControlsContainer,
+            {
+              opacity: this.animations.videoScreenControlsContainer.opacity,
+              marginBottom: this.animations.videoScreenControlsContainer
+                .marginBottom,
+            },
+          ]}>
+          <View style={styles.controls.videoScreenControlsGroup}>
+            {this.renderControl(
+              <MaterialCommunityIcons
+                name={this.props.isRTL ? 'skip-next' : 'skip-previous'}
+                color={'#fff'}
+                size={20}
+              />,
+              this.methods.restartVideo,
+              styles.controls.videoScreenControl,
+            )}
+            {this.renderControl(
+              <MaterialCommunityIcons
+                name={'fast-forward'}
+                color={'#fff'}
+                size={20}
+                style={
+                  this.props.isRTL ? {} : {transform: [{rotateY: '180deg'}]}
+                }
+              />,
+              this.methods.fastBackward,
+              styles.controls.videoScreenControl,
+            )}
+            {this.renderControl(
+              <MaterialCommunityIcons
+                name={this.state.paused ? 'play' : 'pause'}
+                color={'#fff'}
+                size={20}
+                style={
+                  this.props.isRTL ? {transform: [{rotateY: '180deg'}]} : {}
+                }
+              />,
+              this.methods.togglePlayPause,
+              styles.controls.videoScreenControl,
+            )}
+            {this.renderControl(
+              <MaterialCommunityIcons
+                name={'fast-forward'}
+                color={'#fff'}
+                size={20}
+                style={
+                  this.props.isRTL ? {transform: [{rotateY: '180deg'}]} : {}
+                }
+              />,
+              this.methods.fastForward,
+              styles.controls.videoScreenControl,
+            )}
+            {this.renderControl(
+              <MaterialCommunityIcons
+                name={this.props.isRTL ? 'skip-previous' : 'skip-next'}
+                color={'#fff'}
+                size={20}
+              />,
+              this.methods.goToEnd,
+              styles.controls.videoScreenControl,
+            )}
+          </View>
+          <View style={styles.controls.videoScreenControlsGroup}>
+            <View style={styles.controls.timerTextContainer}>
+              <Text style={styles.controls.timerText}>
+                {this.calculateTime()}
+              </Text>
+            </View>
+            {this.renderSeekbar()}
+            <View style={styles.controls.timerTextContainer}>
+              <Text style={styles.controls.timerText}>
+                {this.formatTime(this.state.duration)}
+              </Text>
+            </View>
+            {this.renderControl(
+              <MaterialCommunityIcons
+                name={
+                  this.state.isFullscreen ? 'fullscreen-exit' : 'fullscreen'
+                }
+                color={'#fff'}
+                size={20}
+              />,
+              this.methods.toggleFullscreen,
+              styles.controls.fullscreen,
+            )}
+          </View>
+        </Animated.View>
+      );
+    }
+    return null;
+  }
+
   /**
    * Provide all of our options and render the whole component.
    */
@@ -1351,6 +1539,7 @@ export default class VideoPlayer extends Component {
           {this.renderLoader()}
           {this.renderTopControls()}
           {this.renderBottomControls()}
+          {this.renderVideoScreenControls()}
         </View>
       </TouchableWithoutFeedback>
     );
@@ -1477,12 +1666,36 @@ const styles = {
       marginBottom: 0,
     },
     fullscreen: {
-      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      width: '10%',
+      paddingHorizontal: 10,
+      paddingVertical: 8,
     },
     playPause: {
       position: 'relative',
       width: 80,
       zIndex: 0,
+    },
+    videoScreenControlsContainer: {
+      height: '35%',
+      width: '100%',
+      backgroundColor: '#0c0c0c',
+      opacity: 0.8,
+      flexDirection: 'column',
+      marginBottom: 0,
+      maxHeight: 100,
+    },
+    videoScreenControlsGroup: {
+      flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+      justifyContent: 'center',
+      height: '50%',
+    },
+    videoScreenControl: {
+      position: 'relative',
+      zIndex: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 8,
     },
     title: {
       alignItems: 'center',
@@ -1500,7 +1713,14 @@ const styles = {
       backgroundColor: 'transparent',
       color: '#FFF',
       fontSize: 11,
-      textAlign: 'right',
+      textAlign: 'center',
+      width: '100%',
+    },
+    timerTextContainer: {
+      width: '12%',
+      justifyContent: 'center',
+      height: '100%',
+      marginHorizontal: 5,
     },
   }),
   volume: StyleSheet.create({
@@ -1554,7 +1774,6 @@ const styles = {
       backgroundColor: 'white',
       height: 1,
       position: 'absolute',
-      top: 20,
       width: '100%',
       flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     },

@@ -13,6 +13,10 @@ interface seekbarStyleProps {
   fill?: ViewStyle;
   /** React Native StyleSheet object that is applied to the seekbar's container */
   container?: ViewStyle;
+  /** React Native StyleSheet object that is applied to the handle */
+  handle?: ViewStyle;
+  /** React Native StyleSheet object that is applied to the handle's circle */
+  circle?: ViewStyle;
 }
 
 interface VideoPlayerProperties extends VideoProperties {
@@ -55,7 +59,7 @@ interface VideoPlayerProperties extends VideoProperties {
   /** Function fired when back button is pressed, override if using custom navigation */
   onBack?: () => void;
   /** Fired when the video is complete */
-  onEnd?: () => void;
+  onEnd?: (autoplayEnabled: boolean) => void;
   /** Hide the fullscreen button */
   disableFullscreen?: boolean;
   /** Hide the play/pause toggle */
@@ -86,6 +90,22 @@ interface VideoPlayerProperties extends VideoProperties {
   shouldPlay?: boolean;
   /** Should the loader animation play */
   playLoaderAnimation?: boolean;
+  /** Should the remaining time be shown */
+  showTimeRemaining?: boolean;
+  /** Skip the video to the indicated second */
+  seekToSecond?: number;
+  /** Disable the special controls for the video screen */
+  disableVideoScreenControls?: boolean;
+  /** Fired when the fullscreen button is pressed */
+  toggleFullScreen?: () => void;
+  /** Should the controls be hidden */
+  shouldHideControls?: boolean;
+  /** Should the next video be played - combined with onEnd */
+  autoplayEnabled?: boolean;
+  /** Is the layout of the controls right to left */
+  isRTL?: boolean;
+  /** Function to set the watch percentage of the video */
+  setWatchTime?: (time: number) => void;
 }
 
 export default class VideoPlayer extends Component<VideoPlayerProperties> {
