@@ -327,14 +327,12 @@ export default class VideoPlayer extends Component {
    * new page.
    */
   _onEnd() {
-    let state = this.state;
-    state.paused = true;
-
     if (typeof this.props.onEnd === 'function') {
+      let state = this.state;
+      state.paused = true;
+      this.setState(state);
       this.props.onEnd(this.props.autoplayEnabled);
     }
-
-    this.setState(state);
   }
 
   /**
@@ -607,6 +605,8 @@ export default class VideoPlayer extends Component {
       state.resizeMode = state.isFullscreen === true ? 'cover' : 'contain';
     }
 
+    this._toggleControls();
+    
     if (typeof this.props.toggleFullScreen === 'function') {
       this.props.toggleFullScreen();
     }
