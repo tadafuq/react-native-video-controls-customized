@@ -106,6 +106,10 @@ interface VideoPlayerProperties extends VideoProperties {
   isRTL?: boolean;
   /** Function to set the watch percentage of the video */
   setWatchTime?: (time: number) => void;
+  /** Should the player restart from the beginning */
+  shouldRestart?: boolean;
+  /** Support function to ensure that player doesn't repeatedly restart */
+  resetShouldRestart?: () => void;
 }
 
 export default class VideoPlayer extends Component<VideoPlayerProperties> {
