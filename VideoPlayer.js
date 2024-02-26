@@ -83,6 +83,7 @@ export default class VideoPlayer extends Component {
       shouldHideControls: this.props.shouldHideControls,
       showHandle: this.props.showHandle,
       durationText: this.props.durationText,
+      hasInitializedSeek: false,
     };
 
     /**
@@ -246,26 +247,31 @@ export default class VideoPlayer extends Component {
 
   /**
    * When the video is ready to be displayed we hide the load icon/thumbnail
-   * and hide the controls. We also set the
-   * video duration.
+   * and hide the controls. Also, seek to the required value.
    */
   _onReadyForDisplay() {
     let state = this.state;
     state.loading = false;
-    this.setState(state);
     this.volumeAnimation();
 
     if (state.showControls) {
       this.setControlTimeout();
     }
 
-    if (this.props.seekToSecond) {
+    if (this.props.seekToSecond && !state.hasInitializedSeek) {
+      state.hasInitializedSeek = true;
       this.seekTo(parseFloat(this.props.seekToSecond));
+    }
+
+    if (this.props.shouldRestart) {
+      this.seekTo(0);
+      this.props.resetShouldRestart();
     }
 
     if (typeof this.props.onReadyForDisplay === 'function') {
       this.props.onReadyForDisplay(...arguments);
     }
+    this.setState(state);
   }
 
   /**
